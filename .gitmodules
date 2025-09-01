@@ -4,3 +4,7 @@
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/superfluid-protocol-monorepo"]
+	path = lib/superfluid-protocol-monorepo
+	url = https://github.com/superfluid-finance/protocol-monorepo
+	branch = dev
