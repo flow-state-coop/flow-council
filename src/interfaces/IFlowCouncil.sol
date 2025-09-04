@@ -59,6 +59,17 @@ interface IFlowCouncil {
         Status status;
     }
 
+    /*
+     * Event definitions
+     */
+    event MaxVotingSpreadSet(uint8 maxVotingSpread);
+    event VoterAdded(address account, uint96 votingPower);
+    event VoterRemoved(address account);
+    event VoterEdited(address account, uint96 votingPower);
+    event RecipientAdded(address account, string metadata);
+    event RecipientRemoved(address account);
+    event Voted(address account, Vote[] votes);
+
     /**
      * @notice The status an account should have
      */

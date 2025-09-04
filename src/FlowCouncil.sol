@@ -128,6 +128,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         onlyVoterManager
     {
         maxVotingSpread = _maxVotingSpread;
+
+        emit MaxVotingSpreadSet(_maxVotingSpread);
     }
 
     /**
@@ -148,7 +150,10 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
      * @notice Adds a new recipient
      * @param _account The recipient address
      */
-    function addRecipient(address _account) public onlyRecipientManager {
+    function addRecipient(address _account, string calldata _metadata)
+        public
+        onlyRecipientManager
+    {
         Recipient storage recipient = recipients[_account];
 
         if (recipient.account != address(0)) {
@@ -159,6 +164,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         recipient.account = _account;
         recipientById[recipientCount] = recipient;
         recipientIdByAddress[recipient.account] = recipientCount;
+
+        emit RecipientAdded(_account, _metadata);
     }
 
     /**
@@ -175,21 +182,27 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         delete recipientIdByAddress[_account];
 
         distributionPool.updateMemberUnits(_account, 0);
+
+        emit RecipientRemoved(_account);
     }
 
     /**
      * @notice Updates the flow council recipients
      * @param _recipients The recipients to add or remove
      */
-    function updateRecipients(UpdatingAccount[] calldata _recipients)
-        external
-        onlyRecipientManager
-    {
+    function updateRecipients(
+        UpdatingAccount[] calldata _recipients,
+        string[] calldata _metadata
+    ) external onlyRecipientManager {
+        if (_recipients.length != _metadata.length) {
+            revert INVALID();
+        }
+
         for (uint256 i = 0; i < _recipients.length; i++) {
             if (_recipients[i].status == Status.Removed) {
                 removeRecipient(_recipients[i].account);
             } else {
-                addRecipient(_recipients[i].account);
+                addRecipient(_recipients[i].account, _metadata[i]);
             }
         }
     }
@@ -215,6 +228,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
 
         voter.account = _account;
         voter.votingPower = _votingPower;
+
+        emit VoterAdded(_account, _votingPower);
     }
 
     /**
@@ -244,6 +259,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         }
 
         delete voters[_account];
+
+        emit VoterRemoved(_account);
     }
 
     /**
@@ -264,6 +281,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         }
 
         voters[_account].votingPower = _votingPower;
+
+        emit VoterEdited(_account, _votingPower);
     }
 
     /**
@@ -355,6 +374,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         if (maxVotingSpread > 0 && votingSpread > maxVotingSpread) {
             revert TOO_MUCH_VOTING_SPREAD();
         }
+
+        emit Voted(msg.sender, _votes);
     }
 
     /**

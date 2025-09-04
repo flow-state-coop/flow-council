@@ -110,7 +110,7 @@ contract FlowCouncilTest is Test {
     }
 
     function test_addRecipient() public {
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Recipient memory recipient =
             flowCouncil.getRecipient(firstRecipient);
@@ -126,18 +126,18 @@ contract FlowCouncilTest is Test {
                 IFlowCouncil.ALREADY_ADDED.selector, firstRecipient
             )
         );
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
     }
 
     function test_addRecipient_UNAUTHORIZED() public {
         vm.prank(nonManager);
         vm.expectRevert(IFlowCouncil.UNAUTHORIZED.selector);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
     }
 
     function test_removeRecipient() public {
         flowCouncil.addVoter(firstVoter, 10);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -168,7 +168,7 @@ contract FlowCouncilTest is Test {
     }
 
     function test_removeRecipient_UNAUTHORIZED() public {
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
         vm.prank(nonManager);
         vm.expectRevert(IFlowCouncil.UNAUTHORIZED.selector);
         flowCouncil.removeRecipient(firstRecipient);
@@ -177,6 +177,7 @@ contract FlowCouncilTest is Test {
     function test_updateRecipients() public {
         IFlowCouncil.UpdatingAccount[] memory recipients =
             new IFlowCouncil.UpdatingAccount[](2);
+        string[] memory metadata = new string[](2);
 
         recipients[0] = IFlowCouncil.UpdatingAccount(
             firstRecipient, IFlowCouncil.Status.Added
@@ -184,8 +185,10 @@ contract FlowCouncilTest is Test {
         recipients[1] = IFlowCouncil.UpdatingAccount(
             secondRecipient, IFlowCouncil.Status.Added
         );
+        metadata[0] = "firstRecipient";
+        metadata[1] = "secondRecipient";
 
-        flowCouncil.updateRecipients(recipients);
+        flowCouncil.updateRecipients(recipients, metadata);
 
         assertEq(
             flowCouncil.getRecipient(firstRecipient).account,
@@ -201,7 +204,7 @@ contract FlowCouncilTest is Test {
         recipients[0].status = IFlowCouncil.Status.Removed;
         recipients[1].status = IFlowCouncil.Status.Removed;
 
-        flowCouncil.updateRecipients(recipients);
+        flowCouncil.updateRecipients(recipients, metadata);
 
         assertEq(
             flowCouncil.getRecipient(firstRecipient).account,
@@ -218,6 +221,9 @@ contract FlowCouncilTest is Test {
     function test_updateRecipients_UNAUTHORIZED() public {
         IFlowCouncil.UpdatingAccount[] memory recipients =
             new IFlowCouncil.UpdatingAccount[](2);
+        string[] memory metadata = new string[](2);
+
+        flowCouncil.updateRecipients(recipients, metadata);
 
         recipients[0] = IFlowCouncil.UpdatingAccount(
             firstRecipient, IFlowCouncil.Status.Added
@@ -225,10 +231,12 @@ contract FlowCouncilTest is Test {
         recipients[1] = IFlowCouncil.UpdatingAccount(
             secondRecipient, IFlowCouncil.Status.Added
         );
+        metadata[0] = "firstRecipient";
+        metadata[1] = "secondRecipient";
 
         vm.prank(nonManager);
         vm.expectRevert(IFlowCouncil.UNAUTHORIZED.selector);
-        flowCouncil.updateRecipients(recipients);
+        flowCouncil.updateRecipients(recipients, metadata);
     }
 
     function test_addVoter() public {
@@ -256,7 +264,7 @@ contract FlowCouncilTest is Test {
 
     function test_removeVoter() public {
         flowCouncil.addVoter(firstVoter, 10);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -366,7 +374,7 @@ contract FlowCouncilTest is Test {
 
     function test_vote_single() public {
         flowCouncil.addVoter(firstVoter, 10);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -397,7 +405,7 @@ contract FlowCouncilTest is Test {
     function test_vote_multiple() public {
         flowCouncil.addVoter(firstVoter, 10);
         flowCouncil.addVoter(secondVoter, 10);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -433,7 +441,7 @@ contract FlowCouncilTest is Test {
     }
 
     function test_vote_UNAUTHORIZED() public {
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -462,7 +470,7 @@ contract FlowCouncilTest is Test {
 
     function test_vote_NOT_ENOUGH_VOTING_POWER() public {
         flowCouncil.addVoter(firstVoter, 10);
-        flowCouncil.addRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
 
         IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
 
@@ -482,8 +490,8 @@ contract FlowCouncilTest is Test {
         voters[0] = IFlowCouncil.Voter(firstVoter, 10, currentVotes);
 
         flowCouncil.updateVoters(voters, 1);
-        flowCouncil.addRecipient(firstRecipient);
-        flowCouncil.addRecipient(secondRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+        flowCouncil.addRecipient(secondRecipient, "firstRecipient");
 
         votes[0] = IFlowCouncil.Vote(firstRecipient, 5);
         votes[1] = IFlowCouncil.Vote(secondRecipient, 5);
@@ -497,15 +505,17 @@ contract FlowCouncilTest is Test {
         flowCouncil.addVoter(firstVoter, 55);
 
         IFlowCouncil.UpdatingAccount[] memory recipients =
-            new IFlowCouncil.UpdatingAccount[](6);
+            new IFlowCouncil.UpdatingAccount[](10);
+        string[] memory metadata = new string[](10);
 
         for (uint160 i = 0; i < recipients.length; i++) {
             recipients[i] = IFlowCouncil.UpdatingAccount(
                 address(i + 1), IFlowCouncil.Status.Added
             );
+            metadata[i] = "";
         }
 
-        flowCouncil.updateRecipients(recipients);
+        flowCouncil.updateRecipients(recipients, metadata);
 
         IFlowCouncil.Vote[] memory votes =
             new IFlowCouncil.Vote[](recipients.length);
