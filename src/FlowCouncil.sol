@@ -19,6 +19,14 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
     using SuperTokenV1Library for ISuperToken;
 
     /**
+     * @notice The recipients counter, used for recipient ids
+     * @dev It increase every time a recipient is added, so if a recipient
+     * is removed and added back will have a different id and can be used
+     * to validate old votes that shouldn't be relevant anymore
+     */
+    uint160 private recipientCount;
+
+    /**
      * @notice The super token to distribute
      */
     ISuperToken public superToken;
@@ -40,12 +48,29 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
     mapping(address => Recipient) public recipients;
 
     /**
+     * @notice Maps the recipient id to a Recipient
+     */
+    mapping(uint160 => Recipient) public recipientById;
+
+    /**
+     * @notice Maps the recipient address to an id
+     */
+    mapping(address => uint160) public recipientIdByAddress;
+
+    /**
      * @notice Maps the voter address to a Voter
      */
     mapping(address => Voter) public voters;
 
+    /**
+     * @notice The recipients manager role hash
+     */
     bytes32 public constant RECIPIENT_MANAGER_ROLE =
         keccak256("RECIPIENT_MANAGER_ROLE");
+
+    /**
+     * @notice The voters manager role hash
+     */
     bytes32 public constant VOTER_MANAGER_ROLE = keccak256("VOTER_MANAGER_ROLE");
 
     /**
@@ -130,7 +155,10 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
             revert ALREADY_ADDED(_account);
         }
 
+        recipientCount++;
         recipient.account = _account;
+        recipientById[recipientCount] = recipient;
+        recipientIdByAddress[recipient.account] = recipientCount;
     }
 
     /**
@@ -143,6 +171,9 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         }
 
         delete recipients[_account];
+        delete recipientById[recipientIdByAddress[_account]];
+        delete recipientIdByAddress[_account];
+
         distributionPool.updateMemberUnits(_account, 0);
     }
 
@@ -198,7 +229,18 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         Voter memory voter = voters[_account];
 
         for (uint256 i = 0; i < voter.votes.length; i++) {
-            distributionPool.updateMemberUnits(voter.votes[i].recipient, 0);
+            Recipient storage recipient =
+                recipientById[voter.votes[i].recipientId];
+
+            if (recipient.account != address(0)) {
+                uint96 recipientVotesNew =
+                    recipient.votes - voter.votes[i].amount;
+                distributionPool.updateMemberUnits(
+                    recipient.account, recipientVotesNew
+                );
+                recipient.votes = recipientVotesNew;
+                recipients[recipient.account] = recipient;
+            }
         }
 
         delete voters[_account];
@@ -247,6 +289,75 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
     }
 
     /**
+     * @notice Updates the weights of the distribution pool based on the votes
+     * to the recipients
+     * @param _votes An array of votes with the recipient and vote amount
+     */
+    function vote(Vote[] calldata _votes) external {
+        Voter storage voter = voters[msg.sender];
+
+        if (voter.account == address(0)) {
+            revert UNAUTHORIZED();
+        }
+
+        for (uint256 i = 0; i < _votes.length; i++) {
+            Recipient storage recipient = recipients[_votes[i].recipient];
+            uint160 recipientId = recipientIdByAddress[_votes[i].recipient];
+
+            if (recipient.account == address(0)) {
+                revert NOT_FOUND(_votes[i].recipient);
+            }
+
+            bool hasAlreadyVoted = false;
+            uint96 recipientVotesCurrent = recipient.votes;
+
+            for (uint256 j = 0; j < voter.votes.length; j++) {
+                if (voter.votes[j].recipientId == recipientId) {
+                    hasAlreadyVoted = true;
+                    recipientVotesCurrent -= voter.votes[j].amount;
+                    voter.votes[j].amount = _votes[i].amount;
+
+                    break;
+                }
+            }
+
+            if (!hasAlreadyVoted) {
+                voter.votes.push(CurrentVote(recipientId, _votes[i].amount));
+            }
+
+            uint96 recipientVotesNew = recipientVotesCurrent + _votes[i].amount;
+
+            distributionPool.updateMemberUnits(
+                _votes[i].recipient, recipientVotesNew
+            );
+            recipient.votes = recipientVotesNew;
+            recipientById[recipientId] = recipient;
+        }
+
+        uint96 totalVotes;
+        uint8 votingSpread;
+
+        for (uint256 i = 0; i < voter.votes.length; i++) {
+            if (
+                recipientById[voter.votes[i].recipientId].account != address(0)
+                    && voter.votes[i].amount != 0
+            ) {
+                votingSpread++;
+            }
+
+            totalVotes += voter.votes[i].amount;
+        }
+
+        if (totalVotes > voter.votingPower) {
+            revert NOT_ENOUGH_VOTING_POWER();
+        }
+
+        if (maxVotingSpread > 0 && votingSpread > maxVotingSpread) {
+            revert TOO_MUCH_VOTING_SPREAD();
+        }
+    }
+
+    /**
      * @notice Gets a Recipients from the account address
      * @param _account The recipient address
      */
@@ -268,5 +379,37 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         returns (Voter memory voter)
     {
         voter = voters[_account];
+    }
+
+    /**
+     * @notice Gets all current valid votes for a Voter
+     * @param _account The voter address
+     */
+    function getVotes(address _account) public view returns (Vote[] memory) {
+        Voter memory voter = voters[_account];
+
+        uint256 validVotesCount;
+
+        for (uint256 i = 0; i < voter.votes.length; i++) {
+            Recipient memory recipient =
+                recipientById[voter.votes[i].recipientId];
+
+            if (recipient.account != address(0) && voter.votes[i].amount > 0) {
+                validVotesCount++;
+            }
+        }
+
+        Vote[] memory votes = new Vote[](validVotesCount);
+
+        for (uint256 i = 0; i < voter.votes.length; i++) {
+            Recipient memory recipient =
+                recipientById[voter.votes[i].recipientId];
+
+            if (recipient.account != address(0) && voter.votes[i].amount > 0) {
+                votes[i] = Vote(recipient.account, voter.votes[i].amount);
+            }
+        }
+
+        return votes;
     }
 }

@@ -7,8 +7,69 @@ pragma solidity ^0.8.25;
  */
 interface IFlowCouncil {
     /**
+     * @notice The manager structure
+     */
+    struct Manager {
+        address account;
+        bytes32 role;
+        Status status;
+    }
+
+    /**
+     * @notice The voter structure
+     */
+    struct Voter {
+        address account;
+        uint96 votingPower;
+        CurrentVote[] votes;
+    }
+
+    /**
+     * @notice The manager structure
+     */
+    struct Recipient {
+        address account;
+        uint96 votes;
+    }
+
+    /**
+     * @notice The vote structure
+     */
+    struct Vote {
+        address recipient;
+        uint96 amount;
+    }
+
+    /**
+     * @notice The current votes casted by a voter
+     * @dev The recipient id to validate the votes for recipients that were
+     * not removed
+     */
+    struct CurrentVote {
+        uint160 recipientId;
+        uint96 amount;
+    }
+
+    /**
+     * @notice The structure to represent an account which status needs to be
+     * updated
+     */
+    struct UpdatingAccount {
+        address account;
+        Status status;
+    }
+
+    /**
+     * @notice The status an account should have
+     */
+    enum Status {
+        Added,
+        Removed
+    }
+    /**
      * @notice Throws when the caller does not have the necessary role
      */
+
     error UNAUTHORIZED();
 
     /**
@@ -26,38 +87,13 @@ interface IFlowCouncil {
      */
     error NOT_FOUND(address account);
 
-    struct Manager {
-        address account;
-        bytes32 role;
-        Status status;
-    }
-
-    struct Voter {
-        address account;
-        uint96 votingPower;
-        Vote[] votes;
-    }
-
-    struct Recipient {
-        address account;
-        uint96 votes;
-    }
-
-    struct Vote {
-        address recipient;
-        uint96 amount;
-    }
-
-    struct UpdatingAccount {
-        address account;
-        Status status;
-    }
+    /**
+     * @notice Thrown when the voting power is not enough
+     */
+    error NOT_ENOUGH_VOTING_POWER();
 
     /**
-     * @notice The status an account should have
+     * @notice Thrown when the voting spread is too much
      */
-    enum Status {
-        Added,
-        Removed
-    }
+    error TOO_MUCH_VOTING_SPREAD();
 }
