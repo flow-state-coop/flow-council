@@ -10,9 +10,11 @@ contract DeployFlowCouncilFactory is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        bytes32 salt = 0xf1e1726d79293b680310e12f13dab1e0affbe7fca3301bc2dbdc84afae902541;
+        bytes32 salt =
+            0xf1e1726d79293b680310e12f13dab1e0affbe7fca3301bc2dbdc84afae902541;
 
-        FlowCouncilFactory flowCouncilFactory = new FlowCouncilFactory{salt: salt}();
+        FlowCouncilFactory flowCouncilFactory =
+            new FlowCouncilFactory{ salt: salt }();
 
         console.log(address(flowCouncilFactory));
 
