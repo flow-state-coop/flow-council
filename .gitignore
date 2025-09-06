@@ -12,3 +12,7 @@ docs/
 
 # Dotenv file
 .env
+
+# Subgraph
+abis/
+subgraph.yaml

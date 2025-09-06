@@ -1,0 +1,71 @@
+specVersion: 1.0.0
+description: Track flow councils, voters, recipients, and ballots.
+repository: "https://github.com/Flow-State-Coop/flow-council/tree/master/subgraph"
+
+indexerHints:
+  prune: auto
+
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  - kind: ethereum
+    name: FlowCouncilFactory
+    network: {{ network }}
+    source:
+      address: "{{ address }}"
+      abi: FlowCouncilFactory
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - FlowCouncil
+      abis:
+        - name: FlowCouncilFactory
+          file: ./abis/FlowCouncilFactory.json
+        - name: FlowCouncil
+          file: ./abis/FlowCouncil.json
+      eventHandlers:
+        - event: FlowCouncilCreated(address,address,string)
+          handler: handleFlowCouncilCreated
+      file: ./src/flow-council-factory.ts
+templates:
+  - kind: ethereum/contract
+    name: FlowCouncil
+    network: {{ network }}
+    source:
+      abi: FlowCouncil
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Voter
+        - Recipient
+        - Ballot
+        - CouncilManager
+      abis:
+        - name: FlowCouncil
+          file: ./abis/FlowCouncil.json
+      eventHandlers:
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: VoterAdded(address,uint96)
+          handler: handleVoterAdded
+        - event: VoterRemoved(address)
+          handler: VoterRemoved
+        - event: VoterEdited(address,uint96)
+          handler: handleVoterEdited
+        - event: RecipientAdded(address,string)
+          handler: handleRecipientAdded
+        - event: RecipientRemoved(address)
+          handler: handleRecipientRemoved
+        - event: Voted(address,(address,uint96)[])
+          handler: handleVoted
+        - event: MaxVotingSpreadSet(uint8)
+          handler: handleMaxVotingSpreadSet
+      file: ./src/flow-council.ts

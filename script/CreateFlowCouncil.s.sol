@@ -14,7 +14,7 @@ contract CreateFlowCouncil is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         FlowCouncilFactory flowCouncilFactory =
-            FlowCouncilFactory(0x25B64C200cf3362BaC6961353D38A1dbEB42e60E);
+            FlowCouncilFactory(0x46a2496C9df5c00ccc51BCb9B77345410718De26);
 
         FlowCouncil flowCouncil = flowCouncilFactory.createFlowCouncil(
             "Flow Council",

@@ -1,0 +1,72 @@
+type FlowCouncil @entity {
+  id: ID!
+  metadata: String!
+  distributionPool: Bytes!
+  superToken: Bytes!
+  voters: [Voter!]! @derivedFrom(field: "flowCouncil")
+  votersCount: Int!
+  recipients: [Recipient!]! @derivedFrom(field: "flowCouncil")
+  ballots: [Ballot!]! @derivedFrom(field: "flowCouncil")
+  maxVotingSpread: Int!
+  voterManagerRole: Bytes!
+  recipientManagerRole: Bytes!
+  flowCouncilManagers: [FlowCouncilManager!]! @derivedFrom(field: "flowCouncil")
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type FlowCouncilManager @entity {
+  id: ID!
+  account: Bytes!
+  role: Bytes!
+  flowCouncil: FlowCouncil!
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type Voter @entity {
+  id: ID!
+  account: Bytes!
+  votingPower: BigInt!
+  flowCouncil: FlowCouncil!
+  ballot: Ballot
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type Recipient @entity {
+  id: ID!
+  metadata: String!
+  account: Bytes!
+  flowCouncil: FlowCouncil!
+  votes: [LatestVote!]! @derivedFrom(field: "recipient")
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type Ballot @entity {
+  id: ID!
+  flowCouncil: FlowCouncil!
+  voter: Voter!
+  votes: [Vote!]!
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type Vote @entity {
+  id: ID!
+  votedBy: Bytes!
+  recipient: Recipient!
+  amount: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
+
+type LatestVote @entity {
+  id: ID!
+  votedBy: Bytes!
+  recipient: Recipient!
+  amount: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+}
