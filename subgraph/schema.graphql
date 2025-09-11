@@ -56,7 +56,7 @@ type Ballot @entity {
 type Vote @entity {
   id: ID!
   votedBy: Bytes!
-  recipient: Recipient!
+  recipient: Recipient
   amount: BigInt!
   createdAtBlock: BigInt!
   createdAtTimestamp: BigInt!

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.25;
 
 import { FlowCouncil } from "./FlowCouncil.sol";
-import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { ISuperToken } from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 

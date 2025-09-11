@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { Test, console } from "forge-std/Test.sol";
+import { Test } from "forge-std/Test.sol";
 import { SuperTokenV1Library } from
     "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {
-    ISuperfluid,
-    ISuperfluidPool
-} from
+import { ISuperfluidPool } from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { ISuperToken } from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
-import { SuperfluidPool } from
-    "@superfluid-finance/ethereum-contracts/contracts/agreements/gdav1/SuperfluidPool.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { FlowCouncilFactory } from "../../src/FlowCouncilFactory.sol";
 import { FlowCouncil } from "../../src/FlowCouncil.sol";

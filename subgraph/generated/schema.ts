@@ -699,17 +699,21 @@ export class Vote extends Entity {
     this.set("votedBy", Value.fromBytes(value));
   }
 
-  get recipient(): string {
+  get recipient(): string | null {
     let value = this.get("recipient");
     if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
+      return null;
     } else {
       return value.toString();
     }
   }
 
-  set recipient(value: string) {
-    this.set("recipient", Value.fromString(value));
+  set recipient(value: string | null) {
+    if (!value) {
+      this.unset("recipient");
+    } else {
+      this.set("recipient", Value.fromString(<string>value));
+    }
   }
 
   get amount(): BigInt {

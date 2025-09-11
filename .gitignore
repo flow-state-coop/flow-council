@@ -16,3 +16,4 @@ docs/
 # Subgraph
 abis/
 subgraph.yaml
+build

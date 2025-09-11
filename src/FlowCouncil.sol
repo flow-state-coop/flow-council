@@ -304,7 +304,11 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
             }
         }
 
-        maxVotingSpread = _maxVotingSpread;
+        if (_maxVotingSpread != maxVotingSpread) {
+            maxVotingSpread = _maxVotingSpread;
+
+            emit MaxVotingSpreadSet(_maxVotingSpread);
+        }
     }
 
     /**

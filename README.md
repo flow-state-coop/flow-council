@@ -63,7 +63,7 @@ The contract that manages voters, recipients, and vote processing.
 <tbody>
     <tr>
         <td>Council Factory</td>
-        <td>0x46a2496c9df5c00ccc51bcb9b77345410718de26</td>
+        <td>0x27b27a6471fF12E24bE368E184B96654b3e03454</td>
     </tr>
 </tbody>
 </table>
