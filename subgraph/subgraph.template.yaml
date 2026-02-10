@@ -57,7 +57,7 @@ templates:
         - event: VoterAdded(address,uint96)
           handler: handleVoterAdded
         - event: VoterRemoved(address)
-          handler: VoterRemoved
+          handler: handleVoterRemoved
         - event: VoterEdited(address,uint96)
           handler: handleVoterEdited
         - event: RecipientAdded(address,string)

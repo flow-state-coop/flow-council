@@ -4,8 +4,9 @@ pragma solidity ^0.8.25;
 import { Script, console } from "forge-std/Script.sol";
 import { FlowCouncilFactory } from "../src/FlowCouncilFactory.sol";
 import { FlowCouncil } from "../src/FlowCouncil.sol";
-import { ISuperToken } from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+    ISuperToken
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
 contract CreateFlowCouncil is Script {
     function run() public {
@@ -18,7 +19,7 @@ contract CreateFlowCouncil is Script {
 
         FlowCouncil flowCouncil = flowCouncilFactory.createFlowCouncil(
             "Flow Council",
-            ISuperToken(0x0043d7c85C8b96a49A72A92C0B48CdC4720437d7)
+            ISuperToken(0x671425Ae1f272Bc6F79beC3ed5C4b00e9c628240)
         );
 
         console.log(address(flowCouncil));

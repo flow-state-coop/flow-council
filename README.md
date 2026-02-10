@@ -45,6 +45,10 @@ The contract that manages voters, recipients, and vote processing.
 </thead>
 <tbody>
     <tr>
+        <td>Celo</td>
+        <td>42220</td>
+    </tr>
+    <tr>
         <td>Optimism Sepolia</td>
         <td>11155420</td>
     </tr>

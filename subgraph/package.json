@@ -10,7 +10,7 @@
     "build:optimism-sepolia": "pnpm prepare:optimism-sepolia && bun codegen && graph build",
     "deploy:optimism": "source .env && graph deploy flow-council-optimism --node https://api.subgraph.ormilabs.com/deploy --ipfs https://api.subgraph.ormilabs.com/ipfs --deploy-key $GRAPH_DEPLOY_KEY",
     "deploy:base": "source .env && graph deploy flow-council-base --node https://api.subgraph.ormilabs.com/deploy --ipfs https://api.subgraph.ormilabs.com/ipfs --deploy-key $GRAPH_DEPLOY_KEY",
-    "deploy:celo": "source  .env && goldsky subgraph deploy flow-council-celo/v0.2.6 --path .",
+    "deploy:celo": "source  .env && goldsky subgraph deploy flow-council-celo/v0.3.4 --path .",
     "deploy:arbitrum-one": "source .env && graph deploy flow-council-arbitrum-one --node https://api.subgraph.ormilabs.com/deploy --ipfs https://api.subgraph.ormilabs.com/ipfs --deploy-key $GRAPH_DEPLOY_KEY",
     "deploy:optimism-sepolia": "source .env && graph deploy flow-council-optimism-sepolia --node https://api.subgraph.ormilabs.com/deploy --ipfs https://api.subgraph.ormilabs.com/ipfs --deploy-key $GRAPH_DEPLOY_KEY",
     "prepare:optimism": "mustache config/optimism.json subgraph.template.yaml > subgraph.yaml",

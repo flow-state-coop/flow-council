@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import {
+    AccessControl
+} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {
     ISuperToken,
     ISuperfluidPool
-} from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import { ISuperToken } from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import { PoolConfig } from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
-import { SuperTokenV1Library } from
-    "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+    ISuperToken
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+    PoolConfig
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
+import {
+    SuperTokenV1Library
+} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { IFlowCouncil } from "./interfaces/IFlowCouncil.sol";
 
 contract FlowCouncil is IFlowCouncil, AccessControl {
@@ -71,7 +75,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
     /**
      * @notice The voters manager role hash
      */
-    bytes32 public constant VOTER_MANAGER_ROLE = keccak256("VOTER_MANAGER_ROLE");
+    bytes32 public constant VOTER_MANAGER_ROLE =
+        keccak256("VOTER_MANAGER_ROLE");
 
     /**
      * @notice Checks if the caller is not the admin

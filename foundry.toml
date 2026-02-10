@@ -8,7 +8,7 @@ optimizer_runs = 200
 [rpc_endpoints]
 opsepolia = "https://sepolia.optimism.io"
 
-[fmt]
+[profile.default.fmt]
 line_length = 80
 tab_width = 4
 wrap_comments = true
