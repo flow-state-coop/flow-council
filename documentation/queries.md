@@ -434,10 +434,10 @@ You can also test this with [ReqBin](https://reqbin.com/) — paste the endpoint
 | Esusu | `0xb82896c4f251ed65186b416dbdb6f6192dfaf926` |
 | FocusPet | `0xcb6f72152db12546b21ef0dd5f614ca532531838` |
 | Gardens | `0xd7a3d3a7dd35b8e81fc0b83c032d0ed3261417d9` |
-| Harun Sarikurt | `0xddabeba1c309bf171cd5e60e863ca14cf84bf2e0` |
-| KarlaGod | `0x72578e136e72a18a832be6762230a820f514d180` |
-| Oliseh Genesis | `0xf7dbd2867f55832e4a05e16cd69cb57a70923cdd` |
-| Yoni Ben Ami | `0xf8b4c7098d195d12c1336a09fddaa9afa11bd097` |
+| Ubeswap | `0xddabeba1c309bf171cd5e60e863ca14cf84bf2e0` |
+| Bitsave Protocol | `0x72578e136e72a18a832be6762230a820f514d180` |
+| Sov Seas | `0xf7dbd2867f55832e4a05e16cd69cb57a70923cdd` |
+| Pesia's Kitchen | `0xf8b4c7098d195d12c1336a09fddaa9afa11bd097` |
 
 ### Epoch Schedule
 
