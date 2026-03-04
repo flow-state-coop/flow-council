@@ -62,7 +62,7 @@ These two entities serve different purposes:
 
 ### Entity ID Formats
 
-You'll need these to construct query variables:
+You'll need these to construct query variables. **All addresses must be lowercase** — the subgraph stores IDs in lowercase and lookups are case-sensitive.
 
 | Entity | ID Format | Example |
 |--------|-----------|---------|
