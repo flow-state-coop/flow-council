@@ -441,7 +441,7 @@ You can also test this with [ReqBin](https://reqbin.com/) — paste the endpoint
 
 ### Voter Categories
 
-Voters are classified into three categories. These classifications are **not stored onchain or in the subgraph** — they are maintained off-chain and used to balance voting power at the start of each epoch according to the following split:
+Voters are classified into three categories in the GoodBuilder Program. These classifications are **not stored onchain or in the subgraph** — they are maintained off-chain and used to balance voting power at the start of each epoch according to the following split:
 
 | Category | Weight |
 |----------|--------|
@@ -468,11 +468,11 @@ Voters are classified into three categories. These classifications are **not sto
 
 **Community:** All remaining voters not listed above.
 
-Dashboard builders may find these classifications useful for analyzing vote distributions by category, weighting votes differently, or reproducing the epoch-start vote balancing logic in their evaluations.
+Dashboard builders may find these classifications useful for further analyzing vote distribution across different personas.
 
 ### Epoch Schedule
 
-Epochs are two-week periods. Each epoch starts 1 second after the previous one ends (no overlap, no gap).
+Epochs are the two-week cadence of the GoodBuilders program. In each epoch, new votes are assigned, demo days are held, and recipients submit their milestones/updates.
 
 Epoch 1 (ends 2026-03-04 12:00:00 UTC)
 ```json
