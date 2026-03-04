@@ -148,14 +148,14 @@ Variables:
 
 ### Recipient Standings (Current Votes)
 
-Get the current vote allocations for a specific recipient using `latestVotes`. Each entry is one voter's current allocation — no duplicates.
+Get the current vote allocations for a specific recipient. Each entry is one voter's current allocation — no duplicates.
 
 ```graphql
 query Recipient($recipientId: String!) {
   recipient(id: $recipientId) {
     account
     metadata
-    latestVotes(first: 1000) {
+    votes(first: 1000) {
       votedBy
       amount
       createdAtTimestamp
@@ -173,18 +173,19 @@ Variables (ID format: `{councilAddress}-{recipientAddress}`):
 
 ### Recipient Vote History
 
-Get the full history of votes received by a recipient. This *will* contain duplicate `votedBy` entries if a voter re-voted.
+Get the full history of votes received by a specific recipient. Historical `Vote` records are stored on `Ballot` entities, so query them via `votes` with a `recipient` filter. This *will* contain duplicate `votedBy` entries if a voter re-voted.
 
 ```graphql
-query RecipientHistory($recipientId: String!) {
-  recipient(id: $recipientId) {
-    account
-    metadata
-    votes(first: 1000, orderBy: createdAtTimestamp, orderDirection: desc) {
-      votedBy
-      amount
-      createdAtTimestamp
-    }
+query RecipientHistory($recipientAddress: Bytes!) {
+  votes(
+    first: 1000
+    orderBy: createdAtTimestamp
+    orderDirection: desc
+    where: {recipient_: {account: $recipientAddress}}
+  ) {
+    votedBy
+    amount
+    createdAtTimestamp
   }
 }
 ```
@@ -192,7 +193,7 @@ query RecipientHistory($recipientId: String!) {
 Variables:
 ```json
 {
-  "recipientId": "0xfabef1abae4998146e8a8422813eb787caa26ec2-0x5f3dd795ad9d626f5c0621b339a243220bcbd025"
+  "recipientAddress": "0x5f3dd795ad9d626f5c0621b339a243220bcbd025"
 }
 ```
 
@@ -233,10 +234,12 @@ Variables:
 }
 ```
 
-### All Ballots for a Specific Voter
+### Current Ballot for a Specific Voter
+
+The `ballot` field on `Voter` is singular — it always points to the voter's most recent ballot.
 
 ```graphql
-query VoterBallots($voterId: String!) {
+query VoterCurrentBallot($voterId: String!) {
   voter(id: $voterId) {
     account
     votingPower
@@ -250,6 +253,37 @@ query VoterBallots($voterId: String!) {
       }
       createdAtTimestamp
     }
+  }
+}
+```
+
+Variables (ID format: `{councilAddress}-{voterAddress}`):
+```json
+{
+  "voterId": "0xfabef1abae4998146e8a8422813eb787caa26ec2-0x22705489ca3b4c7e3bed63c9fe5d6660aa945f90"
+}
+```
+
+### All Ballots for a Specific Voter
+
+To get a voter's full ballot history, query top-level `ballots` with a voter filter.
+
+```graphql
+query VoterBallotHistory($voterId: String!) {
+  ballots(
+    first: 1000
+    orderBy: createdAtTimestamp
+    orderDirection: desc
+    where: {voter: $voterId}
+  ) {
+    votes {
+      recipient {
+        account
+        metadata
+      }
+      amount
+    }
+    createdAtTimestamp
   }
 }
 ```
@@ -276,21 +310,104 @@ query Managers($councilId: String!) {
 }
 ```
 
+### Reconstruct Allocations at a Past Time
+
+The subgraph doesn't store historical snapshots — `LatestVote` is updated in place. To reconstruct allocations at a specific past time, fetch all historical `Vote` records up to that timestamp and deduplicate client-side.
+
+```graphql
+query VotesAtTime($councilId: String!, $timestamp: BigInt!) {
+  ballots(
+    first: 1000
+    orderBy: createdAtTimestamp
+    orderDirection: desc
+    where: {flowCouncil: $councilId, createdAtTimestamp_lte: $timestamp}
+  ) {
+    voter {
+      account
+    }
+    votes {
+      recipient {
+        account
+        metadata
+      }
+      amount
+    }
+    createdAtTimestamp
+  }
+}
+```
+
+Variables:
+```json
+{
+  "councilId": "0xfabef1abae4998146e8a8422813eb787caa26ec2",
+  "timestamp": 1772625600
+}
+```
+
+**Client-side reconstruction:** For each voter, keep only their most recent ballot (the first one encountered since results are ordered desc). That ballot's votes represent their allocations at that point in time. Discard earlier ballots from the same voter.
+
 ---
 
 ## Client-Side Aggregation Tips
 
 The subgraph returns raw data — it doesn't compute aggregates. Here are common calculations you'll need to do client-side:
 
-**Total votes per recipient** — Sum the `amount` field across all `latestVotes` for a recipient.
+**Total votes per recipient** — Sum the `amount` field across all `votes` for a recipient.
 
 **Vote distribution percentages** — Divide each recipient's total votes by the sum of all recipients' totals.
 
-**Unique voter count for a recipient** — Count distinct `votedBy` addresses in a recipient's `latestVotes`.
+**Unique voter count for a recipient** — Count distinct `votedBy` addresses in a recipient's `votes`.
 
 **Active vs. inactive voters** — Voters with a non-null `ballot` have voted at least once. Compare against `votersCount` for participation rate.
 
 **Stream share per recipient** — A recipient's share of the total stream equals their vote percentage. If a recipient has 30% of total votes, they receive 30% of the flow rate through the distribution pool.
+
+### Voter Category Breakdown (GoodBuilders)
+
+Voter categories (Mentor, Metrics, Community) are maintained off-chain — see the [Voter Categories](#voter-categories) reference below for the address lists. To analyze votes by category, fetch all voters with their current ballots using the [Voters with Current Ballots](#voters-with-current-ballots) query, then classify each voter client-side:
+
+```js
+const METRICS = new Set([
+  "0x7f0a04f131b8395e4e0bcf4c77e47845c952f49d",
+]);
+
+const MENTORS = new Set([
+  "0x9f6c0ac954829a863e8d09a46a7a167d5763975c",
+  "0x6fb2ed5113e686cd9fe3405203d9dead9d1a3384",
+  "0x86213f1cf0a501857b70df35c1cb3c2ecf112844",
+  "0xf62daae4c3f9fadf689f767716a82dfee5026c89",
+  "0x6e7679d53c43a8a9e2cf87fca99a1db9b379fe29",
+  "0x6eeb37b9757dca963120f61c7e0e0160469a44d3",
+  "0x884ff907d5fb8bae239b64aa8ad18ba3f8196038",
+  "0x31cd90c2788f3e390d2bb72871f5ad3f1a4b22a1",
+  "0xa48840d89a761502a4a7d995c74f3864d651a87f",
+  "0x3b7275c428c9b46d2c244e066c0bbadb9b9a8b9f",
+  "0xf3d4ef9c67bbdb40e7a16975a8a8a4d8e41df8d9",
+  "0xa50064d462e17f7091ee62baebeb18bfebe21507",
+]);
+
+function categorize(voterAddress) {
+  const addr = voterAddress.toLowerCase();
+  if (METRICS.has(addr)) return "metrics";
+  if (MENTORS.has(addr)) return "mentor";
+  return "community";
+}
+
+// Group votes by category, then aggregate per recipient
+const votesByCategory = { mentor: {}, metrics: {}, community: {} };
+for (const voter of voters) {
+  const category = categorize(voter.account);
+  if (!voter.ballot) continue;
+  for (const vote of voter.ballot.votes) {
+    const recipient = vote.recipient.account;
+    votesByCategory[category][recipient] =
+      (votesByCategory[category][recipient] || 0n) + BigInt(vote.amount);
+  }
+}
+```
+
+This lets you answer questions like "How did mentors vote vs. community?" or compute category-weighted scores that reflect the 50/25/25 split used for voting power balancing.
 
 ---
 
