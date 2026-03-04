@@ -439,6 +439,37 @@ You can also test this with [ReqBin](https://reqbin.com/) — paste the endpoint
 | Sov Seas | `0xf7dbd2867f55832e4a05e16cd69cb57a70923cdd` |
 | Pesia's Kitchen | `0xf8b4c7098d195d12c1336a09fddaa9afa11bd097` |
 
+### Voter Categories
+
+Voters are classified into three categories. These classifications are **not stored onchain or in the subgraph** — they are maintained off-chain and used to balance voting power at the start of each epoch according to the following split:
+
+| Category | Weight |
+|----------|--------|
+| Mentor | 50% |
+| Metrics | 25% |
+| Community | 25% |
+
+**Metrics** (1 voter):
+- `0x7F0a04F131B8395e4e0bCf4c77E47845c952f49D`
+
+**Mentor** (12 voters):
+- `0x9F6c0aC954829A863e8d09a46A7A167D5763975c`
+- `0x6fb2ed5113e686cd9fe3405203d9dead9d1a3384`
+- `0x86213f1cf0a501857B70Df35c1cb3C2EcF112844`
+- `0xf62daae4c3f9fadf689f767716a82dfee5026c89`
+- `0x6e7679d53C43a8A9E2cf87fCA99a1DB9B379FE29`
+- `0x6eeb37b9757dca963120f61c7e0e0160469a44d3`
+- `0x884Ff907D5fB8BAe239B64AA8aD18bA3f8196038`
+- `0x31cd90C2788f3e390d2Bb72871f5aD3F1a4B22a1`
+- `0xA48840D89a761502A4a7d995c74f3864D651A87F`
+- `0x3B7275C428c9B46D2c244E066C0bbadB9B9a8B9f`
+- `0xF3d4eF9c67bbdb40e7a16975a8a8A4D8e41Df8D9`
+- `0xA50064D462e17f7091eE62BaebeB18BFEBE21507`
+
+**Community:** All remaining voters not listed above.
+
+Dashboard builders may find these classifications useful for analyzing vote distributions by category, weighting votes differently, or reproducing the epoch-start vote balancing logic in their evaluations.
+
 ### Epoch Schedule
 
 Epochs are two-week periods. Each epoch starts 1 second after the previous one ends (no overlap, no gap).
