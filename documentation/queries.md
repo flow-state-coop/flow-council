@@ -455,7 +455,7 @@ Variables:
 ```
 
 > The `flowRate` is in **wei per second**. To convert to tokens per month:
-> `flowRate × 60 × 60 × 24 × 30 / 1e18`
+> `flowRate × 60 × 60 × 24 × (365 / 12) / 1e18`
 
 ### Individual Funders (Streams to Super App)
 
