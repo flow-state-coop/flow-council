@@ -16,7 +16,6 @@ export function handleFlowCouncilCreated(event: FlowCouncilCreatedEvent): void {
 
   const flowCouncilContract = FlowCouncilContract.bind(flowCouncilAddress);
 
-  entity.metadata = event.params.metadata;
   entity.distributionPool = event.params.distributionPool;
   entity.voterManagerRole = voterManagerRole;
   entity.recipientManagerRole = recipientManagerRole;

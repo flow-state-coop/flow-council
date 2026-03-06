@@ -157,7 +157,6 @@ export function handleRecipientAdded(event: RecipientAdded): void {
   const recipient = new Recipient(
     `${event.address.toHex()}-${event.params.account.toHex()}`
   );
-  recipient.metadata = event.params.metadata;
   recipient.account = event.params.account;
   recipient.flowCouncil = event.address.toHex();
   recipient.latestVotes = [];
