@@ -8,8 +8,8 @@ This guide covers how to query the Flow Council subgraph and related Superfluid 
 
 | Resource | URL |
 |----------|-----|
-| Flow Council Playground | [Goldsky Explorer](https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.6/gn) |
-| Flow Council API Endpoint | `https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.6/gn` |
+| Flow Council Playground | [Goldsky Explorer](https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.7/gn) |
+| Flow Council API Endpoint | `https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.7/gn` |
 | Superfluid Playground | [Superfluid Explorer](https://explorer.superfluid.org/subgraph) *(select Celo network)* |
 | Superfluid API Endpoint | `https://subgraph-endpoints.superfluid.dev/celo-mainnet/protocol-v1` |
 
