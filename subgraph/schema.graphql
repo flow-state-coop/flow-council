@@ -30,6 +30,7 @@ type Voter @entity {
   votingPower: BigInt!
   flowCouncil: FlowCouncil!
   ballot: Ballot
+  latestVotes: [String!]!
   createdAtBlock: BigInt!
   createdAtTimestamp: BigInt!
 }
@@ -39,6 +40,7 @@ type Recipient @entity {
   metadata: String!
   account: Bytes!
   flowCouncil: FlowCouncil!
+  latestVotes: [String!]!
   votes: [LatestVote!]! @derivedFrom(field: "recipient")
   createdAtBlock: BigInt!
   createdAtTimestamp: BigInt!

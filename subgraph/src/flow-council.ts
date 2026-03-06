@@ -68,6 +68,7 @@ export function handleVoterAdded(event: VoterAdded): void {
   voter.account = event.params.account;
   voter.votingPower = event.params.votingPower;
   voter.flowCouncil = flowCouncilId;
+  voter.latestVotes = [];
   voter.createdAtTimestamp = event.block.timestamp;
   voter.createdAtBlock = event.block.number;
   flowCouncil.votersCount = flowCouncil.votersCount + 1;
@@ -88,6 +89,47 @@ export function handleVoterRemoved(event: VoterRemoved): void {
     ]);
 
     return;
+  }
+
+  const voter = Voter.load(voterId);
+
+  if (voter) {
+    const voterLatestVotes = voter.latestVotes;
+
+    for (let i = 0; i < voterLatestVotes.length; i++) {
+      const latestVote = LatestVote.load(voterLatestVotes[i]);
+
+      if (latestVote) {
+        const recipient = Recipient.load(latestVote.recipient);
+
+        if (recipient) {
+          const recipientLatestVotes = recipient.latestVotes;
+          const idx = recipientLatestVotes.indexOf(voterLatestVotes[i]);
+
+          if (idx >= 0) {
+            recipientLatestVotes.splice(idx, 1);
+            recipient.latestVotes = recipientLatestVotes;
+            recipient.save();
+          }
+        }
+      }
+
+      store.remove("LatestVote", voterLatestVotes[i]);
+    }
+
+    if (voter.ballot) {
+      const ballot = Ballot.load(voter.ballot!);
+
+      if (ballot) {
+        const ballotVotes = ballot.votes;
+
+        for (let i = 0; i < ballotVotes.length; i++) {
+          store.remove("Vote", ballotVotes[i]);
+        }
+
+        store.remove("Ballot", voter.ballot!);
+      }
+    }
   }
 
   flowCouncil.votersCount = flowCouncil.votersCount - 1;
@@ -118,6 +160,7 @@ export function handleRecipientAdded(event: RecipientAdded): void {
   recipient.metadata = event.params.metadata;
   recipient.account = event.params.account;
   recipient.flowCouncil = event.address.toHex();
+  recipient.latestVotes = [];
   recipient.createdAtTimestamp = event.block.timestamp;
   recipient.createdAtBlock = event.block.number;
 
@@ -126,14 +169,20 @@ export function handleRecipientAdded(event: RecipientAdded): void {
 
 export function handleRecipientRemoved(event: RecipientRemoved): void {
   const recipientId = `${event.address.toHex()}-${event.params.account.toHex()}`;
+  const recipient = Recipient.load(recipientId);
+
+  if (recipient) {
+    const recipientLatestVotes = recipient.latestVotes;
+
+    for (let i = 0; i < recipientLatestVotes.length; i++) {
+      store.remove("LatestVote", recipientLatestVotes[i]);
+    }
+  }
 
   store.remove("Recipient", recipientId);
 }
 
 export function handleVoted(event: Voted): void {
-  const ballot = new Ballot(
-    `${event.transaction.hash.toHex()}-${event.logIndex.toString()}`
-  );
   const voter = Voter.load(
     `${event.address.toHex()}-${event.params.account.toHex()}`
   );
@@ -145,24 +194,37 @@ export function handleVoted(event: Voted): void {
     return;
   }
 
+  for (let i = 0; i < event.params.votes.length; i++) {
+    if (
+      !Recipient.load(
+        `${event.address.toHex()}-${event.params.votes[i].recipient.toHex()}`
+      )
+    ) {
+      log.warning("Not all recipients found, skipping allocation", [
+        event.params.votes[i].recipient.toHex(),
+      ]);
+      return;
+    }
+  }
+
+  const ballot = new Ballot(
+    `${event.transaction.hash.toHex()}-${event.logIndex.toString()}`
+  );
+
   ballot.flowCouncil = event.address.toHex();
   ballot.voter = voter.id;
   ballot.createdAtBlock = event.block.number;
   ballot.createdAtTimestamp = event.block.timestamp;
 
   const votes: string[] = [];
+  const latestVoteIds: string[] = [];
 
   for (let i = 0; i < event.params.votes.length; i++) {
     const recipient = Recipient.load(
       `${event.address.toHex()}-${event.params.votes[i].recipient.toHex()}`
     );
 
-    if (!recipient) {
-      log.warning("Not all recipients found, skipping allocation", [
-        event.params.votes[i].recipient.toHex(),
-      ]);
-      return;
-    }
+    if (!recipient) continue;
 
     const vote = new Vote(
       `${event.params.account.toHex()}-${recipient.account.toHex()}-${
@@ -194,12 +256,30 @@ export function handleVoted(event: Voted): void {
     latestVote.createdAtTimestamp = event.block.timestamp;
 
     latestVote.save();
+    latestVoteIds.push(latestVoteId);
+
+    const recipientLatestVotes = recipient.latestVotes;
+
+    if (!recipientLatestVotes.includes(latestVoteId)) {
+      recipientLatestVotes.push(latestVoteId);
+      recipient.latestVotes = recipientLatestVotes;
+      recipient.save();
+    }
+  }
+
+  const previousLatestVotes = voter.latestVotes;
+
+  for (let i = 0; i < previousLatestVotes.length; i++) {
+    if (!latestVoteIds.includes(previousLatestVotes[i])) {
+      store.remove("LatestVote", previousLatestVotes[i]);
+    }
   }
 
   ballot.votes = votes;
   ballot.save();
 
   voter.ballot = ballot.id;
+  voter.latestVotes = latestVoteIds;
   voter.save();
 }
 

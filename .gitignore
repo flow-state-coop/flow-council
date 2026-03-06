@@ -17,3 +17,4 @@ docs/
 abis/
 subgraph.yaml
 build
+generated
