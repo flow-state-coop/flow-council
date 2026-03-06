@@ -1,6 +1,5 @@
 type FlowCouncil @entity {
   id: ID!
-  metadata: String!
   distributionPool: Bytes!
   superToken: Bytes!
   voters: [Voter!]! @derivedFrom(field: "flowCouncil")
@@ -37,7 +36,6 @@ type Voter @entity {
 
 type Recipient @entity {
   id: ID!
-  metadata: String!
   account: Bytes!
   flowCouncil: FlowCouncil!
   latestVotes: [String!]!
