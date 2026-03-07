@@ -450,7 +450,7 @@ The `getTotalAmountReceivedByMember()` function on the [Distribution Pool contra
 
 This is the **source of truth for recipient profile data** (name, description, social links, etc.). The subgraph only stores recipient addresses — use this API for all profile/metadata information.
 
-**Endpoint:** `POST https://flowstate.network/api/flow-council/applications`
+**Endpoint:** `GET https://flowstate.network/api/flow-council/applications/public`
 
 | Param | Type | Required |
 |-------|------|----------|
@@ -458,17 +458,17 @@ This is the **source of truth for recipient profile data** (name, description, s
 | `councilId` | string | yes |
 
 ```js
-await fetch("https://flowstate.network/api/flow-council/applications", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    chainId: 42220,
-    councilId: "0xfabef1abae4998146e8a8422813eb787caa26ec2",
-  }),
+const params = new URLSearchParams({
+  chainId: "42220",
+  councilId: "0xfabef1abae4998146e8a8422813eb787caa26ec2",
 });
+
+await fetch(
+  `https://flowstate.network/api/flow-council/applications/public?${params}`
+);
 ```
 
-You can also test this with [ReqBin](https://reqbin.com/) — paste the endpoint URL, set method to POST, and use body:
-```json
-{"chainId": 42220, "councilId": "0xfabef1abae4998146e8a8422813eb787caa26ec2"}
+You can also test this directly in your browser or with curl:
+```bash
+curl "https://flowstate.network/api/flow-council/applications/public?chainId=42220&councilId=0xfabef1abae4998146e8a8422813eb787caa26ec2"
 ```
