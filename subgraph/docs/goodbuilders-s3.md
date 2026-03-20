@@ -43,7 +43,7 @@ Voters are classified into three categories in the GoodBuilder Program. These cl
 **Mentor** (12 voters):
 - `0x9F6c0aC954829A863e8d09a46A7A167D5763975c`
 - `0x5a9f2ca69F82621c841eFEfAbD1F244273Cd0245`
-- `0x86213f1cf0a501857B70Df35c1cb3C2EcF112844`
+- `0x0994e0206e3fa5dea037a6bfbcf168b94bf74bc3`
 - `0xf62daae4c3f9fadf689f767716a82dfee5026c89`
 - `0x6e7679d53C43a8A9E2cf87fCA99a1DB9B379FE29`
 - `0x6eeb37b9757dca963120f61c7e0e0160469a44d3`
@@ -70,7 +70,7 @@ const METRICS = new Set([
 const MENTORS = new Set([
   "0x9f6c0ac954829a863e8d09a46a7a167d5763975c",
   "0x5a9f2ca69F82621c841eFEfAbD1F244273Cd0245",
-  "0x86213f1cf0a501857b70df35c1cb3c2ecf112844",
+  "0x0994e0206e3fa5dea037a6bfbcf168b94bf74bc3",
   "0xf62daae4c3f9fadf689f767716a82dfee5026c89",
   "0x6e7679d53c43a8a9e2cf87fca99a1db9b379fe29",
   "0x6eeb37b9757dca963120f61c7e0e0160469a44d3",
