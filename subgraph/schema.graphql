@@ -38,10 +38,13 @@ type Recipient @entity {
   id: ID!
   account: Bytes!
   flowCouncil: FlowCouncil!
+  removed: Boolean!
   latestVotes: [String!]!
   votes: [LatestVote!]! @derivedFrom(field: "recipient")
   createdAtBlock: BigInt!
   createdAtTimestamp: BigInt!
+  removedAtBlock: BigInt
+  removedAtTimestamp: BigInt
 }
 
 type Ballot @entity {

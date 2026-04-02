@@ -31,6 +31,30 @@ dataSources:
         - event: FlowCouncilCreated(address,address,string)
           handler: handleFlowCouncilCreated
       file: ./src/flow-council-factory.ts
+  {{#v2}}
+  - kind: ethereum
+    name: FlowCouncilFactoryV2
+    network: {{ network }}
+    source:
+      address: "{{ addressV2 }}"
+      abi: FlowCouncilFactory
+      startBlock: {{ startBlockV2 }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - FlowCouncil
+      abis:
+        - name: FlowCouncilFactory
+          file: ./abis/FlowCouncilFactory.json
+        - name: FlowCouncil
+          file: ./abis/FlowCouncil.json
+      eventHandlers:
+        - event: FlowCouncilCreated(address,address,string)
+          handler: handleFlowCouncilCreated
+      file: ./src/flow-council-factory.ts
+  {{/v2}}
 templates:
   - kind: ethereum/contract
     name: FlowCouncil

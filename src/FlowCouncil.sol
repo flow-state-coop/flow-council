@@ -371,9 +371,8 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
                     && voter.votes[i].amount != 0
             ) {
                 votingSpread++;
+                totalVotes += voter.votes[i].amount;
             }
-
-            totalVotes += voter.votes[i].amount;
         }
 
         if (totalVotes > voter.votingPower) {
@@ -430,13 +429,15 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         }
 
         Vote[] memory votes = new Vote[](validVotesCount);
+        uint256 j;
 
         for (uint256 i = 0; i < voter.votes.length; i++) {
             Recipient memory recipient =
                 recipientById[voter.votes[i].recipientId];
 
             if (recipient.account != address(0) && voter.votes[i].amount > 0) {
-                votes[i] = Vote(recipient.account, voter.votes[i].amount);
+                votes[j] = Vote(recipient.account, voter.votes[i].amount);
+                j++;
             }
         }
 

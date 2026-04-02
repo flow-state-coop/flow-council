@@ -499,6 +499,119 @@ contract FlowCouncilTest is Test {
         flowCouncil.vote(votes);
     }
 
+    function test_vote_afterRecipientRemoved_votingPowerRestored() public {
+        flowCouncil.addVoter(firstVoter, 10);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+        flowCouncil.addRecipient(secondRecipient, "secondRecipient");
+
+        IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
+        votes[0] = IFlowCouncil.Vote(firstRecipient, 10);
+
+        vm.startPrank(firstVoter);
+        flowCouncil.vote(votes);
+        vm.stopPrank();
+
+        flowCouncil.removeRecipient(firstRecipient);
+
+        votes[0] = IFlowCouncil.Vote(secondRecipient, 10);
+
+        vm.startPrank(firstVoter);
+        flowCouncil.vote(votes);
+        vm.stopPrank();
+
+        ISuperfluidPool distributionPool = flowCouncil.distributionPool();
+
+        assertEq(
+            distributionPool.getUnits(secondRecipient),
+            10,
+            "Voter should be able to use full voting power after recipient removal"
+        );
+        assertEq(flowCouncil.getRecipient(secondRecipient).votes, 10);
+    }
+
+    function test_vote_afterRecipientRemoved_multipleVoters() public {
+        flowCouncil.addVoter(firstVoter, 10);
+        flowCouncil.addVoter(secondVoter, 10);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+        flowCouncil.addRecipient(secondRecipient, "secondRecipient");
+
+        IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
+        votes[0] = IFlowCouncil.Vote(firstRecipient, 10);
+
+        vm.prank(firstVoter);
+        flowCouncil.vote(votes);
+
+        vm.prank(secondVoter);
+        flowCouncil.vote(votes);
+
+        flowCouncil.removeRecipient(firstRecipient);
+
+        votes[0] = IFlowCouncil.Vote(secondRecipient, 10);
+
+        vm.prank(firstVoter);
+        flowCouncil.vote(votes);
+
+        vm.prank(secondVoter);
+        flowCouncil.vote(votes);
+
+        ISuperfluidPool distributionPool = flowCouncil.distributionPool();
+
+        assertEq(
+            distributionPool.getUnits(secondRecipient),
+            20,
+            "Both voters should reallocate full voting power"
+        );
+        assertEq(flowCouncil.getRecipient(secondRecipient).votes, 20);
+    }
+
+    function test_getVotes_afterRecipientRemoved() public {
+        flowCouncil.addVoter(firstVoter, 10);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+        flowCouncil.addRecipient(secondRecipient, "secondRecipient");
+
+        IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](2);
+        votes[0] = IFlowCouncil.Vote(firstRecipient, 5);
+        votes[1] = IFlowCouncil.Vote(secondRecipient, 5);
+
+        vm.prank(firstVoter);
+        flowCouncil.vote(votes);
+
+        flowCouncil.removeRecipient(firstRecipient);
+
+        IFlowCouncil.Vote[] memory activeVotes = flowCouncil.getVotes(firstVoter);
+
+        assertEq(activeVotes.length, 1, "Should only return active votes");
+        assertEq(activeVotes[0].recipient, secondRecipient);
+        assertEq(activeVotes[0].amount, 5);
+    }
+
+    function test_vote_afterRecipientRemovedAndReAdded() public {
+        flowCouncil.addVoter(firstVoter, 10);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+
+        IFlowCouncil.Vote[] memory votes = new IFlowCouncil.Vote[](1);
+        votes[0] = IFlowCouncil.Vote(firstRecipient, 10);
+
+        vm.prank(firstVoter);
+        flowCouncil.vote(votes);
+
+        flowCouncil.removeRecipient(firstRecipient);
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+
+        votes[0] = IFlowCouncil.Vote(firstRecipient, 10);
+
+        vm.prank(firstVoter);
+        flowCouncil.vote(votes);
+
+        assertEq(
+            flowCouncil.getRecipient(firstRecipient).votes,
+            10,
+            "Re-added recipient should have fresh votes from new recipientId"
+        );
+        assertEq(flowCouncil.getVotes(firstVoter).length, 1);
+        assertEq(flowCouncil.getVotes(firstVoter)[0].amount, 10);
+    }
+
     function test_vote_update() public {
         flowCouncil.addVoter(firstVoter, 55);
 

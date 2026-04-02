@@ -1,5 +1,8 @@
 {
   "network": "celo",
   "address": "0x27b27a6471fF12E24bE368E184B96654b3e03454",
-  "startBlock": 56487491
+  "startBlock": 56487491,
+  "v2": true,
+  "addressV2": "0x966D8D0B0e39E51f8A965Be1C11b7CFb1707c500",
+  "startBlockV2": 61951547
 }
