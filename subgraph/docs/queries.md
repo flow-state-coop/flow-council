@@ -8,8 +8,8 @@ This guide covers how to query the Flow Council subgraph and related Superfluid 
 
 | Resource | URL |
 |----------|-----|
-| Flow Council Playground | [Goldsky Explorer](https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.7/gn) |
-| Flow Council API Endpoint | `https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.3.7/gn` |
+| Flow Council Playground | [Goldsky Explorer](https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.4.1/gn) |
+| Flow Council API Endpoint | `https://api.goldsky.com/api/public/project_cmbkdj2bd7cr601uwafoe4u3y/subgraphs/flow-council-celo/v0.4.1/gn` |
 | Superfluid Playground | [Superfluid Explorer](https://explorer.superfluid.org/subgraph) *(select Celo network)* |
 | Superfluid API Endpoint | `https://subgraph-endpoints.superfluid.dev/celo-mainnet/protocol-v1` |
 
@@ -39,7 +39,7 @@ FlowCouncil
 │   ├── Ballot (a voter's complete vote submission)
 │   │   └── Vote (individual allocation: recipient + amount)
 │   └── LatestVote (current allocation snapshot per recipient)
-├── Recipient (receives votes, gets stream share)
+├── Recipient (receives votes, gets stream share; tracks removal via removed/removedAtTimestamp)
 └── FlowCouncilManager (admin role holder)
 ```
 
@@ -47,7 +47,7 @@ FlowCouncil
 |--------|--------------------|
 | **FlowCouncil** | A council instance — holds config, links to all voters/recipients |
 | **Voter** | A participant with voting power who can cast ballots |
-| **Recipient** | An account that receives votes and a proportional share of the stream |
+| **Recipient** | An account that receives votes and a proportional share of the stream. Tracks removal status via `removed`, `removedAtTimestamp`, and `removedAtBlock` fields |
 | **Ballot** | A single vote transaction — captures all of a voter's allocations at once |
 | **Vote** | One voter → one recipient allocation within a ballot (historical record) |
 | **LatestVote** | The *current* allocation from a voter to a recipient (updated in place) |
@@ -59,6 +59,20 @@ These two entities serve different purposes:
 
 - **Vote** — An append-only historical log. Every time a voter submits a ballot, new Vote records are created. Use this when you need vote history over time.
 - **LatestVote** — A snapshot of the current state. When a voter re-votes, their LatestVote is updated in place. Use this when you need current standings.
+
+### Recipient Removal Tracking
+
+When a recipient is removed from the pool, the subgraph now retains the `Recipient` entity with three additional fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `removed` | `Boolean!` | Whether the recipient has been removed from the pool |
+| `removedAtTimestamp` | `BigInt` | Unix timestamp of when the recipient was removed (`null` if still active) |
+| `removedAtBlock` | `BigInt` | Block number of the removal (`null` if still active) |
+
+**Why this matters:** When a recipient is removed, voters who previously allocated votes to that recipient may still have those votes recorded in their ballot. It is not practical to iterate through all voter ballots and explicitly clear votes for removed recipients. Instead, the `removedAtTimestamp` marks the point at which the recipient's votes are excluded from funding calculations. Even when a voter later submits a new ballot that no longer includes the removed recipient, the `removedAtTimestamp` remains the authoritative point at which those stale votes stopped counting.
+
+To filter for only active recipients, use `where: { removed: false }`. To include removal metadata (e.g. for historical analysis), query without filtering.
 
 ### Entity ID Formats
 
@@ -93,6 +107,8 @@ query FlowCouncil($councilId: String!) {
     maxVotingSpread
     recipients {
       account
+      removed
+      removedAtTimestamp
     }
     createdAtTimestamp
   }
@@ -151,6 +167,8 @@ Get the current vote allocations for a specific recipient. Each entry is one vot
 query Recipient($recipientId: String!) {
   recipient(id: $recipientId) {
     account
+    removed
+    removedAtTimestamp
     votes(first: 1000) {
       votedBy
       amount
@@ -303,6 +321,29 @@ query Managers($councilId: String!) {
 }
 ```
 
+### Removed Recipients
+
+List all recipients that have been removed from the pool, including when they were removed.
+
+```graphql
+query RemovedRecipients($councilId: String!) {
+  flowCouncil(id: $councilId) {
+    recipients(where: {removed: true}) {
+      account
+      removedAtTimestamp
+      removedAtBlock
+    }
+  }
+}
+```
+
+Variables:
+```json
+{
+  "councilId": "0xfabef1abae4998146e8a8422813eb787caa26ec2"
+}
+```
+
 ### Reconstruct Allocations at a Past Time
 
 The subgraph doesn't store historical snapshots — `LatestVote` is updated in place. To reconstruct allocations at a specific past time, fetch all historical `Vote` records up to that timestamp and deduplicate client-side.
@@ -354,6 +395,8 @@ The subgraph returns raw data — it doesn't compute aggregates. Here are common
 **Active vs. inactive voters** — Voters with a non-null `ballot` have voted at least once. Compare against `votersCount` for participation rate.
 
 **Stream share per recipient** — A recipient's share of the total stream equals their vote percentage. If a recipient has 30% of total votes, they receive 30% of the flow rate through the distribution pool.
+
+**Excluding stale votes for removed recipients** — When computing current funding allocations, exclude votes for recipients where `removed: true`. The `removedAtTimestamp` is the authoritative cutoff for when those votes stopped counting. Voters may still have ballot entries referencing removed recipients (from ballots cast before the removal), but these should not be included in active funding calculations. When those voters eventually submit a new ballot, the removed recipient will no longer appear — but the `removedAtTimestamp` (not the new ballot timestamp) is when the votes were effectively excluded.
 
 ---
 
