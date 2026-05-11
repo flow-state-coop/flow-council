@@ -13,19 +13,21 @@ Program-specific reference data for the GoodBuilders Season 3 deployment on Celo
 
 ## Recipients
 
-| Name | Address |
-|------|---------|
-| Balaio | `0x7c191ca3bc2eddcf295424958310fd5299ebe05b` |
-| CANVASSING | `0x9cfa5c4bfe08a1a3f7c17d6503eeb23a0290c4ca` |
-| Delulu | `0x5f3dd795ad9d626f5c0621b339a243220bcbd025` |
-| Drip | `0xdb3a14f438ebf7a982c4372c8a17985b05f3a1ec` |
-| Esusu | `0xb82896c4f251ed65186b416dbdb6f6192dfaf926` |
-| FocusPet | `0xcb6f72152db12546b21ef0dd5f614ca532531838` |
-| Gardens | `0xd7a3d3a7dd35b8e81fc0b83c032d0ed3261417d9` |
-| Ubeswap | `0xddabeba1c309bf171cd5e60e863ca14cf84bf2e0` |
-| Bitsave Protocol | `0x72578e136e72a18a832be6762230a820f514d180` |
-| Sov Seas | `0xf7dbd2867f55832e4a05e16cd69cb57a70923cdd` |
-| Pesia's Kitchen | `0xf8b4c7098d195d12c1336a09fddaa9afa11bd097` |
+| Name | Address | Status |
+|------|---------|--------|
+| Balaio | `0x7c191ca3bc2eddcf295424958310fd5299ebe05b` | Active |
+| CANVASSING | `0x9cfa5c4bfe08a1a3f7c17d6503eeb23a0290c4ca` | Active |
+| Delulu | `0x5f3dd795ad9d626f5c0621b339a243220bcbd025` | Active |
+| Drip | `0xdb3a14f438ebf7a982c4372c8a17985b05f3a1ec` | Removed (1773997717) |
+| Esusu | `0xb82896c4f251ed65186b416dbdb6f6192dfaf926` | Active |
+| FocusPet | `0xcb6f72152db12546b21ef0dd5f614ca532531838` | Active |
+| Gardens | `0xd7a3d3a7dd35b8e81fc0b83c032d0ed3261417d9` | Active |
+| Ubeswap | `0xddabeba1c309bf171cd5e60e863ca14cf84bf2e0` | Active |
+| Bitsave Protocol | `0x72578e136e72a18a832be6762230a820f514d180` | Removed (1773684111) |
+| Sov Seas | `0xf7dbd2867f55832e4a05e16cd69cb57a70923cdd` | Active |
+| Pesia's Kitchen | `0xf8b4c7098d195d12c1336a09fddaa9afa11bd097` | Active |
+
+> **Note:** "Removed" recipients are no longer in the distribution pool. The timestamp in parentheses is the Unix timestamp of removal. Voters may still have stale ballot entries referencing removed recipients — see the [Recipient Removal Tracking](queries.md#recipient-removal-tracking) section in the query guide for how to handle this.
 
 ## Voter Categories
 
