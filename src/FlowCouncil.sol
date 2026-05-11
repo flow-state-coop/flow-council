@@ -170,6 +170,9 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         recipientById[recipientCount] = recipient;
         recipientIdByAddress[recipient.account] = recipientCount;
 
+        distributionPool.updateMemberUnits(_account, 1);
+        superToken.tryConnectPoolFor(distributionPool, _account);
+
         emit RecipientAdded(_account, _metadata);
     }
 
@@ -256,7 +259,7 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
                 uint96 recipientVotesNew =
                     recipient.votes - voter.votes[i].amount;
                 distributionPool.updateMemberUnits(
-                    recipient.account, recipientVotesNew
+                    recipient.account, recipientVotesNew + 1
                 );
                 recipient.votes = recipientVotesNew;
                 recipients[recipient.account] = recipient;
@@ -356,7 +359,7 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
             uint96 recipientVotesNew = recipientVotesCurrent + _votes[i].amount;
 
             distributionPool.updateMemberUnits(
-                _votes[i].recipient, recipientVotesNew
+                _votes[i].recipient, recipientVotesNew + 1
             );
             recipient.votes = recipientVotesNew;
             recipientById[recipientId] = recipient;
