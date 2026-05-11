@@ -592,7 +592,8 @@ contract FlowCouncilTest is Test {
 
         flowCouncil.removeRecipient(firstRecipient);
 
-        IFlowCouncil.Vote[] memory activeVotes = flowCouncil.getVotes(firstVoter);
+        IFlowCouncil.Vote[] memory activeVotes =
+            flowCouncil.getVotes(firstVoter);
 
         assertEq(activeVotes.length, 1, "Should only return active votes");
         assertEq(activeVotes[0].recipient, secondRecipient);
