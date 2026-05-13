@@ -6,11 +6,15 @@ import {
     SuperTokenV1Library
 } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {
+    ISuperfluid,
     ISuperfluidPool
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {
     ISuperToken
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
+import {
+    IGeneralDistributionAgreementV1
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { FlowCouncilFactory } from "../../src/FlowCouncilFactory.sol";
 import { FlowCouncil } from "../../src/FlowCouncil.sol";
@@ -34,7 +38,7 @@ contract FlowCouncilTest is Test {
     IERC20 fakeDai = IERC20(0x4247bA6C3658Fa5C0F523BAcea8D0b97aF1a175e);
 
     function setUp() public {
-        vm.createSelectFork({ blockNumber: 40000000, urlOrAlias: "opsepolia" });
+        vm.createSelectFork({ blockNumber: 43400000, urlOrAlias: "opsepolia" });
 
         superToken = superFakeDai;
         flowCouncilFactory = new FlowCouncilFactory();
@@ -140,6 +144,38 @@ contract FlowCouncilTest is Test {
                 address(flowCouncil.distributionPool()), firstRecipient
             ),
             "Recipient should be auto-connected to distribution pool"
+        );
+    }
+
+    function test_addRecipient_succeedsWhenRecipientOptedOutOfAutoConnect()
+        public
+    {
+        ISuperfluid host = ISuperfluid(superToken.getHost());
+        IGeneralDistributionAgreementV1 gda = IGeneralDistributionAgreementV1(
+            address(
+                host.getAgreementClass(
+                    keccak256(
+                        "org.superfluid-finance.agreements.GeneralDistributionAgreement.v1"
+                    )
+                )
+            )
+        );
+
+        vm.prank(firstRecipient);
+        gda.setConnectPermission(false);
+
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+
+        assertEq(
+            flowCouncil.distributionPool().getUnits(firstRecipient),
+            1,
+            "Recipient should still get the base unit when auto-connect is denied"
+        );
+        assertFalse(
+            superToken.isMemberConnected(
+                address(flowCouncil.distributionPool()), firstRecipient
+            ),
+            "Recipient must remain disconnected when they have opted out"
         );
     }
 

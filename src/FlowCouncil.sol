@@ -67,6 +67,13 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
     mapping(address => Voter) public voters;
 
     /**
+     * @notice Base-unit floor assigned to every recipient on add and preserved
+     * across vote / removeVoter, so a freshly-added recipient receives a share
+     * of the stream even with zero votes
+     */
+    uint128 private constant BASE_UNIT = 1;
+
+    /**
      * @notice The recipients manager role hash
      */
     bytes32 public constant RECIPIENT_MANAGER_ROLE =
@@ -170,7 +177,10 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
         recipientById[recipientCount] = recipient;
         recipientIdByAddress[recipient.account] = recipientCount;
 
-        distributionPool.updateMemberUnits(_account, 1);
+        distributionPool.updateMemberUnits(_account, BASE_UNIT);
+        // Auto-connect is best-effort: silently no-ops if the recipient has
+        // opted out via setMemberConnectionPermission(false) or already used
+        // their 4 autoconnect slots for this token
         superToken.tryConnectPoolFor(distributionPool, _account);
 
         emit RecipientAdded(_account, _metadata);
@@ -259,7 +269,7 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
                 uint96 recipientVotesNew =
                     recipient.votes - voter.votes[i].amount;
                 distributionPool.updateMemberUnits(
-                    recipient.account, recipientVotesNew + 1
+                    recipient.account, recipientVotesNew + BASE_UNIT
                 );
                 recipient.votes = recipientVotesNew;
                 recipients[recipient.account] = recipient;
@@ -359,7 +369,7 @@ contract FlowCouncil is IFlowCouncil, AccessControl {
             uint96 recipientVotesNew = recipientVotesCurrent + _votes[i].amount;
 
             distributionPool.updateMemberUnits(
-                _votes[i].recipient, recipientVotesNew + 1
+                _votes[i].recipient, recipientVotesNew + BASE_UNIT
             );
             recipient.votes = recipientVotesNew;
             recipientById[recipientId] = recipient;
