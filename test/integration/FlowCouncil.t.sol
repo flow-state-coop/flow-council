@@ -34,7 +34,7 @@ contract FlowCouncilTest is Test {
     IERC20 fakeDai = IERC20(0x4247bA6C3658Fa5C0F523BAcea8D0b97aF1a175e);
 
     function setUp() public {
-        vm.createSelectFork({ blockNumber: 28605487, urlOrAlias: "opsepolia" });
+        vm.createSelectFork({ blockNumber: 40000000, urlOrAlias: "opsepolia" });
 
         superToken = superFakeDai;
         flowCouncilFactory = new FlowCouncilFactory();
@@ -118,6 +118,11 @@ contract FlowCouncilTest is Test {
             firstRecipient,
             "Recipient should be added to Flow Council"
         );
+        assertEq(
+            flowCouncil.distributionPool().getUnits(firstRecipient),
+            1,
+            "Recipient should have 1 base unit on add"
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -125,6 +130,17 @@ contract FlowCouncilTest is Test {
             )
         );
         flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+    }
+
+    function test_addRecipient_connectsPool() public {
+        flowCouncil.addRecipient(firstRecipient, "firstRecipient");
+
+        assertTrue(
+            superToken.isMemberConnected(
+                address(flowCouncil.distributionPool()), firstRecipient
+            ),
+            "Recipient should be auto-connected to distribution pool"
+        );
     }
 
     function test_addRecipient_UNAUTHORIZED() public {
@@ -220,8 +236,6 @@ contract FlowCouncilTest is Test {
         IFlowCouncil.UpdatingAccount[] memory recipients =
             new IFlowCouncil.UpdatingAccount[](2);
         string[] memory metadata = new string[](2);
-
-        flowCouncil.updateRecipients(recipients, metadata);
 
         recipients[0] = IFlowCouncil.UpdatingAccount(
             firstRecipient, IFlowCouncil.Status.Added
@@ -385,8 +399,8 @@ contract FlowCouncilTest is Test {
 
         assertEq(
             distributionPool.getUnits(firstRecipient),
-            10,
-            "Recipient should have units assigned in the distribution pool"
+            11,
+            "Recipient should have votes + 1 units assigned in the distribution pool"
         );
         assertEq(
             flowCouncil.getRecipient(firstRecipient).votes,
@@ -414,7 +428,7 @@ contract FlowCouncilTest is Test {
 
         ISuperfluidPool distributionPool = flowCouncil.distributionPool();
 
-        assertEq(distributionPool.getUnits(firstRecipient), 10);
+        assertEq(distributionPool.getUnits(firstRecipient), 11);
         assertEq(flowCouncil.getRecipient(firstRecipient).votes, 10);
         assertEq(flowCouncil.getVoter(firstVoter).votes[0].amount, 10);
 
@@ -423,8 +437,8 @@ contract FlowCouncilTest is Test {
 
         assertEq(
             distributionPool.getUnits(firstRecipient),
-            20,
-            "Recipient should have units assigned in the distribution pool"
+            21,
+            "Recipient should have votes + 1 units assigned in the distribution pool"
         );
         assertEq(
             flowCouncil.getRecipient(firstRecipient).votes,
@@ -523,7 +537,7 @@ contract FlowCouncilTest is Test {
 
         assertEq(
             distributionPool.getUnits(secondRecipient),
-            10,
+            11,
             "Voter should be able to use full voting power after recipient removal"
         );
         assertEq(flowCouncil.getRecipient(secondRecipient).votes, 10);
@@ -558,7 +572,7 @@ contract FlowCouncilTest is Test {
 
         assertEq(
             distributionPool.getUnits(secondRecipient),
-            20,
+            21,
             "Both voters should reallocate full voting power"
         );
         assertEq(flowCouncil.getRecipient(secondRecipient).votes, 20);
@@ -578,7 +592,8 @@ contract FlowCouncilTest is Test {
 
         flowCouncil.removeRecipient(firstRecipient);
 
-        IFlowCouncil.Vote[] memory activeVotes = flowCouncil.getVotes(firstVoter);
+        IFlowCouncil.Vote[] memory activeVotes =
+            flowCouncil.getVotes(firstVoter);
 
         assertEq(activeVotes.length, 1, "Should only return active votes");
         assertEq(activeVotes[0].recipient, secondRecipient);
@@ -645,8 +660,8 @@ contract FlowCouncilTest is Test {
         for (uint256 i = 0; i < votes.length; i++) {
             assertEq(
                 distributionPool.getUnits(votes[i].recipient),
-                votes[i].amount,
-                "Recipient should have units assigned in the distribution pool"
+                uint128(votes[i].amount) + 1,
+                "Recipient should have votes + 1 units assigned in the distribution pool"
             );
             assertEq(
                 flowCouncil.getRecipient(votes[i].recipient).votes,
@@ -669,8 +684,8 @@ contract FlowCouncilTest is Test {
         for (uint256 i = 0; i < votes.length; i++) {
             assertEq(
                 distributionPool.getUnits(votes[i].recipient),
-                votes[i].amount,
-                "Recipient should have units assigned in the distribution pool"
+                uint128(votes[i].amount) + 1,
+                "Recipient should have votes + 1 units assigned in the distribution pool"
             );
             assertEq(
                 flowCouncil.getRecipient(votes[i].recipient).votes,
