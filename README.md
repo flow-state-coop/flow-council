@@ -45,6 +45,18 @@ The contract that manages voters, recipients, and vote processing.
 </thead>
 <tbody>
     <tr>
+        <td>Optimism</td>
+        <td>10</td>
+    </tr>
+    <tr>
+        <td>Base</td>
+        <td>8453</td>
+    </tr>
+    <tr>
+        <td>Arbitrum One</td>
+        <td>42161</td>
+    </tr>
+    <tr>
         <td>Celo</td>
         <td>42220</td>
     </tr>
@@ -61,13 +73,20 @@ The contract that manages voters, recipients, and vote processing.
 <thead>
     <tr>
         <th>Contract</th>
+        <th>Chain</th>
         <th>Address</th>
     </tr>
 </thead>
 <tbody>
     <tr>
         <td>Council Factory</td>
-        <td>0x966D8D0B0e39E51f8A965Be1C11b7CFb1707c500</td>
+        <td>Optimism, Base, Arbitrum One, Celo</td>
+        <td>0x589232342bfeCb372dbbc01d17e8D112a27fF125</td>
+    </tr>
+    <tr>
+        <td>Council Factory</td>
+        <td>Optimism Sepolia</td>
+        <td>0xDD1a61127d910e6a7CD71788F0Ebb5A46DFDB424</td>
     </tr>
 </tbody>
 </table>

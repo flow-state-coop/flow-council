@@ -4,5 +4,8 @@
   "startBlock": 56487491,
   "v2": true,
   "addressV2": "0x966D8D0B0e39E51f8A965Be1C11b7CFb1707c500",
-  "startBlockV2": 61951547
+  "startBlockV2": 61951547,
+  "v3": true,
+  "addressV3": "0x589232342bfeCb372dbbc01d17e8D112a27fF125",
+  "startBlockV3": 69259810
 }
