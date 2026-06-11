@@ -15,11 +15,11 @@ contract CreateFlowCouncil is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         FlowCouncilFactory flowCouncilFactory =
-            FlowCouncilFactory(0xDD1a61127d910e6a7CD71788F0Ebb5A46DFDB424);
+            FlowCouncilFactory(0x589232342bfeCb372dbbc01d17e8D112a27fF125);
 
         FlowCouncil flowCouncil = flowCouncilFactory.createFlowCouncil(
             "E2E Live Smoke Council",
-            ISuperToken(0x0043d7c85C8b96a49A72A92C0B48CdC4720437d7)
+            ISuperToken(vm.envAddress("SUPER_TOKEN"))
         );
 
         console.log(address(flowCouncil));
