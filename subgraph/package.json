@@ -10,7 +10,7 @@
     "build:optimism-sepolia": "pnpm prepare:optimism-sepolia && bun codegen && graph build",
     "deploy:optimism": "source .env && graph deploy flow-council-optimism --version-label v0.4.2 --node https://api.studio.thegraph.com/deploy/ --ipfs https://ipfs.network.thegraph.com --deploy-key $STUDIO_DEPLOY_KEY",
     "deploy:base": "source .env && graph deploy flow-council-base --version-label v0.4.2 --node https://api.studio.thegraph.com/deploy/ --ipfs https://ipfs.network.thegraph.com --deploy-key $STUDIO_DEPLOY_KEY",
-    "deploy:celo": "source .env && graph deploy flow-council-celo --version-label v0.4.2 --node https://api.studio.thegraph.com/deploy/ --ipfs https://ipfs.network.thegraph.com --deploy-key $STUDIO_DEPLOY_KEY",
+    "deploy:celo": "source  .env && goldsky subgraph deploy flow-council-celo/v0.4.2 --path .",
     "deploy:arbitrum-one": "source .env && graph deploy flow-council-arbitrum-one --version-label v0.4.2 --node https://api.studio.thegraph.com/deploy/ --ipfs https://ipfs.network.thegraph.com --deploy-key $STUDIO_DEPLOY_KEY",
     "deploy:optimism-sepolia": "source .env && goldsky subgraph deploy flow-council-optimism-sepolia/v0.4.2 --path .",
     "prepare:optimism": "mustache config/optimism.json subgraph.template.yaml > subgraph.yaml",
